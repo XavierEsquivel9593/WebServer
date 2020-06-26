@@ -13,8 +13,8 @@ process.env.TIEMPO= process.env.TIEMPO || '1hr';
 if(process.env.NODE_ENV === 'dev'){
     URL='mongodb://localhost:27017/cafe';
 }else{
-    //URL= process.env.MONGO = process.env.MONGO;
-    URL='mongodb+srv://Xavier:123@cluster0-igcgx.mongodb.net/cafe';
+    URL= process.env.MONGO;
+    //URL='mongodb+srv://Xavier:123@cluster0-igcgx.mongodb.net/cafe';
 }
 
 process.env.URLDB = URL;
