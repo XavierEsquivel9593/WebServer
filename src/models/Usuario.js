@@ -20,7 +20,12 @@ let UsuarioSchema = new Schema({
     telefono:{
         type:Number,
         required: false
+    },
+    google : {
+        type:Boolean,
+        default:false
     }
+
 });
 
 

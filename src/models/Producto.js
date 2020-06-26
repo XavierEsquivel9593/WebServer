@@ -14,6 +14,13 @@ let ProductoSchema = new Schema({
     cantidad:{
         type: Number,
         required: [true, "La cantidad es obligatoria" ]
+    },
+    creador:{
+        type: mongoose.Schema.Types.ObjectId
+    },
+    creacion:{
+        type:Date,
+        default: Date.now()
     }
 });
 module.exports = mongoose.model('Producto', ProductoSchema);
