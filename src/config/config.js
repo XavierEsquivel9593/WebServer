@@ -3,6 +3,7 @@ process.env.PORT = process.env.PORT || 3000;
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev';
 
  let URL;
+ let x;
 
  //Palabra Secreta 
 process.env.SECRETO =process.env.SECRETO || 'gatitos';
