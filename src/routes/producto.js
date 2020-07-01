@@ -16,9 +16,11 @@ app.get('/producto', verificaToken, (req, res) => {
     let cantidad = req.query.cantidad || 4;
     cantidad = Number(cantidad);
 
-    Producto.find({creador:usuarioid}, 'nombre precio cantidad')
+    Producto.find({ disponible: true })
         .skip(pagina)
         .limit(cantidad)
+        .populate('creador', 'nombre correo')//jala datos del creador
+        .populate('categoria', 'descripcion')//jala datos de categoria
         .exec((err, productos) => {
             if (err) {
                 return res.status(500).json({
@@ -55,6 +57,36 @@ app.post('/producto', verificaToken, (req, res) => {
     });
 });
 
+app.get('/producto/:id', verificaToken, (req, res) => {
+    let id = req.params.id;
+    let body = req.body;
+    Producto.findById(id)
+        .populate('creador', 'nombre correo')//jala datos del creador
+        .populate('categoria', 'descripcion')//jala datos de categoria
+        .exec((err, productoID) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err: {
+                        msj: "producto no encontrado"
+                    }
+                })
+            }
+            if (!productoID) {
+                return res.status(400).json({
+                    ok: false,
+                    err: {
+                        msj: "producto no encontrado"
+                    }
+                })
+            }
+            res.status(200).json({
+                ok: true,
+                productoID
+            })
+        });
+});
+
 app.put('/producto/:id', verificaToken, (req, res) => {
     let id = req.params.id;
     let body = _.pick(req.body, ['nombre', 'precio']);
@@ -65,7 +97,7 @@ app.put('/producto/:id', verificaToken, (req, res) => {
             return res.status(400).json({
                 msj: 'No tienes permitido modificar el producto'
             })
-        } 
+        }
         Producto.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, productoDB) => {
             if (err) {
                 return res.status(500).json({
@@ -83,34 +115,57 @@ app.put('/producto/:id', verificaToken, (req, res) => {
 
 });
 
+//|---------------------|
+//|buscador de productos|
+//|---------------------|
+app.get('/produtctos/buscar/:p', verificaToken, (req, res) => {
+    let palabra = req.params.p;
+    let buscar = new RegExp(palabra, 'i'); //constructor
+
+    Producto.findOne({ nombre: buscar })
+        .populate()
+        .exec((err, productoDB) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                })
+            }
+            res.status(200).json({
+                ok: true,
+                productoDB
+            })
+        })
+});
+//|---------------------|
+//|borrar un de producto|
+//|---------------------|
+//buscar por id
+//solo el usuario creado puede borrar
+//Cambiar disponible a flase
 app.delete('/producto/:id', verificaToken, (req, res) => {
-
-    //solo puede eliminar el producto el usuario si corresponde con el usuario autenticado
-    let usuarioid = req.usuario._id;
-    
     let id = req.params.id;
-
-    Producto.findByIdAndRemove(id, (err, productoBorrado) => {
+    let usuarioid = req.usuario._id;
+    Producto.findById(id, (err, productoDB) => {
         if (err) {
             return res.status(500).json({
                 err
             })
         }
-
-        if (!productoBorrado) {
-            return res.status(400).json({
-                ok: false,
-                err: {
-                    msj: "Producto no encontrado"
-                }
+        productoDB.disponible = false;
+        Producto.findByIdAndUpdate(id, productoDB, {new:true}, (err, productoDB) => {
+            if (err) {
+                return res.status(500).json({
+                    err
+                })
+            }
+            res.status(200).json({
+                ok: true,
+                productoDB
             })
-        }
-
-        res.status(200).json({
-            ok: true,
-            productoBorrado
-        })
-    })
+        });
+    });
 });
+
+
 
 module.exports = app;

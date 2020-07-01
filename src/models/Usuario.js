@@ -24,6 +24,10 @@ let UsuarioSchema = new Schema({
     google : {
         type:Boolean,
         default:false
+    },
+    img:{
+        type: String,
+        require: false
     }
 
 });
